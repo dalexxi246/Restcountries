@@ -8,9 +8,8 @@ import com.wh2.restcountries.model.rest.responses.CountryResponse;
 
 import java.util.List;
 
+import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class GetCountriesListInteractor {
 
@@ -38,6 +37,16 @@ public class GetCountriesListInteractor {
                         callback.onCountriesFound(countryListItemResponses);
                     }
                 });
+    }
+
+    public void getCountriesDetailed(String regionalBlock, CountriesCallback countriesCallback) {
+        api.getCountriesByRegionalBloc(regionalBlock)
+                .flatMap(Observable::from)
+                .flatMap(countryListItemResponse -> api.getCountryDetails(countryListItemResponse.getAlpha2Code()))
+                .subscribe(
+                        countryResponse -> System.out.println(countryResponse.getAlpha3Code() + " -> " + countryResponse.getName()),
+                        countriesCallback::onError,
+                        countriesCallback::onComplete);
     }
 
     public void getCountryDetails(String countryCode, CountriesCallback callback) {
